@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JDK17'
-        maven 'Maven-3.9'
-    }
-
     stages {
 
         stage('Checkout') {
@@ -16,18 +11,33 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                bat 'java -version'
-                bat 'mvn -version'
                 bat 'mvn clean test'
+            }
+        }
+
+        stage('Static Analysis - PMD') {
+            steps {
+                bat 'mvn pmd:pmd'
             }
         }
 
         stage('Deploy DEV') {
             when {
+                branch 'feature/*'
+            }
+            steps {
+                echo 'Deploying application to DEV App'
+                bat 'echo DEV deployment successful'
+            }
+        }
+
+        stage('Deploy QA') {
+            when {
                 branch 'dev'
             }
             steps {
-                echo 'Deploying application to DEV environment'
+                echo 'Deploying application to QA App'
+                bat 'echo QA deployment successful'
             }
         }
 
@@ -36,17 +46,21 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo 'Deploying application to PROD environment'
+                echo 'Deploying application to PROD App'
+                bat 'echo PROD deployment successful'
             }
         }
     }
 
     post {
+        always {
+            echo 'Pipeline completed'
+        }
         success {
-            echo 'Pipeline completed successfully'
+            echo 'Pipeline SUCCESS'
         }
         failure {
-            echo 'Pipeline failed'
+            echo 'Pipeline FAILED'
         }
     }
 }
