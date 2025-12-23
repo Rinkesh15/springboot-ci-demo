@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         jdk 'JDK17'
-        maven 'Maven3'
+        maven 'Maven-3.9'
     }
 
     environment {
@@ -32,7 +32,6 @@ pipeline {
 
         stage('Static Analysis - PMD') {
             steps {
-                // IMPORTANT: pmd:site generates target/site/pmd.html
                 bat 'mvn pmd:site'
             }
         }
