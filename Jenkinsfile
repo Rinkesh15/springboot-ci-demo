@@ -24,6 +24,7 @@ pipeline {
             }
             post {
                 always {
+                    echo 'Publishing JUnit Test Results'
                     junit 'target/surefire-reports/*.xml'
                 }
             }
@@ -31,7 +32,8 @@ pipeline {
 
         stage('Static Analysis - PMD') {
             steps {
-                bat 'mvn pmd:pmd'
+                // IMPORTANT: pmd:site generates target/site/pmd.html
+                bat 'mvn pmd:site'
             }
         }
 
@@ -67,9 +69,15 @@ pipeline {
     }
 
     post {
+        always {
+            echo 'Archiving PMD Report'
+            archiveArtifacts artifacts: 'target/site/pmd.html', allowEmptyArchive: true
+        }
+
         success {
             echo 'Pipeline SUCCESS'
         }
+
         failure {
             echo 'Pipeline FAILED'
         }
