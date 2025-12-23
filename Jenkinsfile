@@ -3,7 +3,11 @@ pipeline {
 
     tools {
         jdk 'JDK17'
-        maven 'Maven-3.9'
+        maven 'Maven3'
+    }
+
+    environment {
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
     }
 
     stages {
@@ -18,6 +22,11 @@ pipeline {
             steps {
                 bat 'mvn clean test'
             }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
         }
 
         stage('Static Analysis - PMD') {
@@ -28,21 +37,21 @@ pipeline {
 
         stage('Deploy DEV') {
             when {
-                branch 'feature/*'
+                branch 'dev'
             }
             steps {
-                echo 'Deploying application to DEV App'
-                bat 'echo DEV deployment successful'
+                echo 'Deploying to DEV environment'
+                // bat 'mvn deploy -Pdev'
             }
         }
 
         stage('Deploy QA') {
             when {
-                branch 'dev'
+                branch 'qa'
             }
             steps {
-                echo 'Deploying application to QA App'
-                bat 'echo QA deployment successful'
+                echo 'Deploying to QA environment'
+                // bat 'mvn deploy -Pqa'
             }
         }
 
@@ -51,20 +60,13 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo 'Deploying application to PROD App'
-                bat 'echo PROD deployment successful'
+                echo 'Deploying to PROD environment'
+                // bat 'mvn deploy -Pprod'
             }
         }
     }
 
     post {
-        always {
-        echo 'Publishing JUnit Test Results'
-        junit '**/target/surefire-reports/*.xml'
-
-        echo 'Archiving PMD Report'
-        archiveArtifacts artifacts: 'target/site/pmd.html', fingerprint: true
-    }
         success {
             echo 'Pipeline SUCCESS'
         }
