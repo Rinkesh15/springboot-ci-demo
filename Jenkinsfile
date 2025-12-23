@@ -61,6 +61,9 @@ pipeline {
         always {
         echo 'Publishing JUnit Test Results'
         junit '**/target/surefire-reports/*.xml'
+
+        echo 'Archiving PMD Report'
+        archiveArtifacts artifacts: 'target/site/pmd.html', fingerprint: true
     }
         success {
             echo 'Pipeline SUCCESS'
