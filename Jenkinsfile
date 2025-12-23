@@ -22,7 +22,7 @@ pipeline {
 
         stage('Static Analysis - PMD') {
             steps {
-                bat 'mvn pmd:site'
+                bat 'mvn pmd:pmd'
             }
         }
 
