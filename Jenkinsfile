@@ -28,7 +28,7 @@ pipeline {
 
         stage('Deploy DEV') {
             when {
-                branch 'feature/*'
+                branch 'dev'
             }
             steps {
                 echo 'Deploying application to DEV App'
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Deploy QA') {
             when {
-                branch 'dev'
+                branch 'qa'
             }
             steps {
                 echo 'Deploying application to QA App'
