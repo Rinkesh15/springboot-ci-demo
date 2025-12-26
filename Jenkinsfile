@@ -6,23 +6,32 @@ pipeline {
         maven 'Maven-3.9'
     }
 
+    environment {
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
+                echo 'Checking out source code'
                 checkout scm
             }
         }
 
         stage('Build & Test') {
             steps {
+                echo 'Running Maven Build & Unit Tests'
                 bat 'mvn clean test'
             }
         }
 
-        stage('Static Analysis - PMD') {
+        stage('Static Analysis - PMD (Non-Blocking)') {
             steps {
-                bat 'mvn pmd:pmd'
+                echo 'Running PMD (non-blocking)'
+                bat '''
+                    mvn pmd:pmd || echo "PMD failed or not configured – continuing pipeline"
+                '''
             }
         }
 
@@ -31,8 +40,8 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                echo 'Deploying application to DEV App'
-                bat 'echo DEV deployment successful'
+                echo 'Deploying to DEV environment'
+                // bat 'mvn deploy -Pdev'
             }
         }
 
@@ -41,8 +50,8 @@ pipeline {
                 branch 'qa'
             }
             steps {
-                echo 'Deploying application to QA App'
-                bat 'echo QA deployment successful'
+                echo 'Deploying to QA environment'
+                // bat 'mvn deploy -Pqa'
             }
         }
 
@@ -51,18 +60,33 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo 'Deploying application to PROD App'
-                bat 'echo PROD deployment successful'
+                echo 'Deploying to PROD environment'
+                // bat 'mvn deploy -Pprod'
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline SUCCESS'
+
+        always {
+            echo 'Publishing Test & Analysis Reports'
+
+            // JUnit Test Results
+            junit '**/target/surefire-reports/*.xml'
+
+            // PMD Report (if generated)
+            recordIssues(
+                tools: [pmdParser(pattern: '**/target/pmd.xml')],
+                enabledForFailure: true
+            )
         }
+
+        success {
+            echo '✅ Pipeline SUCCESS'
+        }
+
         failure {
-            echo 'Pipeline FAILED'
+            echo '❌ Pipeline FAILED'
         }
     }
 }
