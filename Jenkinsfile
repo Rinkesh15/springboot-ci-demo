@@ -71,10 +71,11 @@ pipeline {
         always {
             echo 'Publishing Test & Analysis Reports'
 
-            // JUnit Test Results
+            archiveArtifacts artifacts: '**/target/surefire-reports/*.xml,**/target/pmd.xml',
+                             allowEmptyArchive: true
+
             junit '**/target/surefire-reports/*.xml'
 
-            // PMD Report (if generated)
             recordIssues(
                 tools: [pmdParser(pattern: '**/target/pmd.xml')],
                 enabledForFailure: true
