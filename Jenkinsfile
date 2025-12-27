@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'
+        jdk 'JDK21'
         maven 'Maven-3.9'
     }
 
@@ -19,19 +19,34 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        // ---------------- OLD PROJECT ----------------
+        stage('Build & Test - OLD App') {
             steps {
-                echo 'Running Maven Build & Unit Tests'
-                bat 'mvn clean test'
+                echo 'Running build for OLD Java application'
+                dir('springboot-ci-demo') {
+                    bat 'mvn clean test'
+                }
+            }
+        }
+
+        // ---------------- NEW PROJECT ----------------
+        stage('Build & Test - Spring Boot CI Demo V1') {
+            steps {
+                echo 'Running build for NEW Spring Boot CI Demo V1'
+                dir('springboot-ci-demo-v1/springboot-ci-demo-v1') {
+                    bat 'mvn clean test'
+                }
             }
         }
 
         stage('Static Analysis - PMD (Non-Blocking)') {
             steps {
-                echo 'Running PMD (non-blocking)'
-                bat '''
-                    mvn pmd:pmd || echo "PMD failed or not configured – continuing pipeline"
-                '''
+                echo 'Running PMD (non-blocking) on NEW app'
+                dir('springboot-ci-demo-v1/springboot-ci-demo-v1') {
+                    bat '''
+                        mvn pmd:pmd || echo "PMD failed or not configured – continuing pipeline"
+                    '''
+                }
             }
         }
 
@@ -40,8 +55,7 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                echo 'Deploying to DEV environment'
-                // bat 'mvn deploy -Pdev'
+                echo 'Deploying DEV (POC placeholder)'
             }
         }
 
@@ -50,8 +64,7 @@ pipeline {
                 branch 'qa'
             }
             steps {
-                echo 'Deploying to QA environment'
-                // bat 'mvn deploy -Pqa'
+                echo 'Deploying QA (POC placeholder)'
             }
         }
 
@@ -60,24 +73,29 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo 'Deploying to PROD environment'
-                // bat 'mvn deploy -Pprod'
+                echo 'Deploying PROD (POC placeholder)'
             }
         }
     }
 
     post {
-
         always {
-            echo 'Publishing Test & Analysis Reports'
+            echo 'Publishing reports for NEW app'
 
+ HEAD
             archiveArtifacts artifacts: '**/target/surefire-reports/*.xml,**/target/pmd.xml',
                              allowEmptyArchive: true
 
             junit '**/target/surefire-reports/*.xml'
 
+            archiveArtifacts artifacts: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml, springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml',
+                             allowEmptyArchive: true
+
+            junit 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml'
+ 3728c26 (Extend Jenkins pipeline to build Spring Boot CI Demo V1)
+
             recordIssues(
-                tools: [pmdParser(pattern: '**/target/pmd.xml')],
+                tools: [pmdParser(pattern: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml')],
                 enabledForFailure: true
             )
         }
