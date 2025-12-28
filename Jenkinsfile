@@ -19,20 +19,10 @@ pipeline {
             }
         }
 
-        // ---------------- OLD PROJECT ----------------
-        stage('Build & Test - OLD App') {
-            steps {
-                echo 'Running build for OLD Java application'
-                dir('springboot-ci-demo') {
-                    bat 'mvn clean test'
-                }
-            }
-        }
-
-        // ---------------- NEW PROJECT ----------------
+        // ---------------- NEW PROJECT ONLY ----------------
         stage('Build & Test - Spring Boot CI Demo V1') {
             steps {
-                echo 'Running build for NEW Spring Boot CI Demo V1'
+                echo 'Running build for Spring Boot CI Demo V1'
                 dir('springboot-ci-demo-v1/springboot-ci-demo-v1') {
                     bat 'mvn clean test'
                 }
@@ -41,10 +31,10 @@ pipeline {
 
         stage('Static Analysis - PMD (Non-Blocking)') {
             steps {
-                echo 'Running PMD (non-blocking) on NEW app'
+                echo 'Running PMD (non-blocking)'
                 dir('springboot-ci-demo-v1/springboot-ci-demo-v1') {
                     bat '''
-                        mvn pmd:pmd || echo "PMD failed or not configured – continuing pipeline"
+                        mvn pmd:pmd || echo "PMD failed – continuing pipeline"
                     '''
                 }
             }
@@ -58,37 +48,20 @@ pipeline {
                 echo 'Deploying DEV (POC placeholder)'
             }
         }
-
-        stage('Deploy QA') {
-            when {
-                branch 'qa'
-            }
-            steps {
-                echo 'Deploying QA (POC placeholder)'
-            }
-        }
-
-        stage('Deploy PROD') {
-            when {
-                branch 'master'
-            }
-            steps {
-                echo 'Deploying PROD (POC placeholder)'
-            }
-        }
     }
 
     post {
         always {
-            echo 'Publishing reports for NEW app'
+            echo 'Publishing reports (non-blocking)'
 
-            archiveArtifacts artifacts: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml, springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml',
+            archiveArtifacts artifacts: '**/target/surefire-reports/*.xml, **/target/pmd.xml',
                              allowEmptyArchive: true
 
-            junit 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml'
+            junit testResults: '**/target/surefire-reports/*.xml',
+                  allowEmptyResults: true
 
             recordIssues(
-                tools: [pmdParser(pattern: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml')],
+                tools: [pmdParser(pattern: '**/target/pmd.xml')],
                 enabledForFailure: true
             )
         }
