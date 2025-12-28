@@ -82,12 +82,6 @@ pipeline {
         always {
             echo 'Publishing reports for NEW app'
 
- HEAD
-            archiveArtifacts artifacts: '**/target/surefire-reports/*.xml,**/target/pmd.xml',
-                             allowEmptyArchive: true
-
-            junit '**/target/surefire-reports/*.xml'
-
             archiveArtifacts artifacts: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml, springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml',
                              allowEmptyArchive: true
 
