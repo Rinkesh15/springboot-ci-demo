@@ -92,7 +92,6 @@ pipeline {
                              allowEmptyArchive: true
 
             junit 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/surefire-reports/*.xml'
- 3728c26 (Extend Jenkins pipeline to build Spring Boot CI Demo V1)
 
             recordIssues(
                 tools: [pmdParser(pattern: 'springboot-ci-demo-v1/springboot-ci-demo-v1/**/target/pmd.xml')],
