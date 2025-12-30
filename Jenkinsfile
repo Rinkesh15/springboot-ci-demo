@@ -53,12 +53,19 @@ pipeline {
         always {
             echo 'Publishing reports (non-blocking)'
 
-            archiveArtifacts artifacts: '**/target/surefire-reports/*.xml, **/target/pmd.xml',
-                             allowEmptyArchive: true
-
+            // ✅ JUnit reports
             junit testResults: '**/target/surefire-reports/*.xml',
                   allowEmptyResults: true
 
+            // ✅ Archive PMD XML (for Jenkins UI)
+            archiveArtifacts artifacts: '**/target/pmd.xml',
+                             allowEmptyArchive: true
+
+            // ✅ Archive PMD HTML (clickable in Jenkins UI)
+            archiveArtifacts artifacts: '**/target/site/pmd.html',
+                             allowEmptyArchive: true
+
+            // ✅ Show PMD issues in Jenkins UI
             recordIssues(
                 tools: [pmdParser(pattern: '**/target/pmd.xml')],
                 enabledForFailure: true
