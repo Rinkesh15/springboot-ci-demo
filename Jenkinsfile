@@ -33,7 +33,7 @@ pipeline {
                 echo 'Running PMD (non-blocking)'
                 dir('springboot-ci-demo-v1') {
                     bat '''
-                        mvn pmd:pmd || echo "PMD failed – continuing pipeline"
+                        mvn clean test pmd:pmd site || echo "PMD failed – continuing pipeline"
                     '''
                 }
             }
