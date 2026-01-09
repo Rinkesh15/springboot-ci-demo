@@ -1,13 +1,26 @@
 pipeline {
     agent any
 
+    options {
+        durabilityHint('MAX_SURVIVABILITY')
+        disableConcurrentBuilds()
+    }
+
     tools {
         jdk 'JDK21'
-        maven 'Maven-3.9'
     }
 
     environment {
         MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+
+        BASE_DIR = "/opt/springboot"
+        APP_NAME = "springboot-ci-demo.jar"
+
+        DEV_PORT = "8081"
+        QA_PORT  = "8082"
+
+        DEV_LOG = "${BASE_DIR}/dev/app.log"
+        QA_LOG  = "${BASE_DIR}/qa/app.log"
     }
 
     stages {
@@ -19,65 +32,63 @@ pipeline {
             }
         }
 
-        stage('Build & Test - Spring Boot CI Demo V1') {
+        stage('Build & Test') {
             steps {
-                echo 'Running build for Spring Boot CI Demo V1'
-                dir('springboot-ci-demo-v1') {
-                    bat 'mvn clean test'
+                sh './mvnw clean test'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: '**/surefire-reports/*.xml'
                 }
             }
         }
 
-        stage('Static Analysis - PMD (Non-Blocking)') {
+        stage('PMD Analysis') {
             steps {
-                echo 'Running PMD (non-blocking)'
-                dir('springboot-ci-demo-v1') {
-                    bat '''
-                        mvn clean test pmd:pmd site || echo "PMD failed – continuing pipeline"
-                    '''
-                }
+                sh './mvnw pmd:pmd'
             }
         }
 
-        stage('Deploy DEV') {
+        stage('Package Application') {
             when {
-                branch 'dev'
+                anyOf {
+                    branch 'dev'
+                    branch 'qa'
+                }
             }
             steps {
-                echo 'Deploying DEV (POC placeholder)'
+                sh './mvnw clean package -DskipTests'
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Publishing reports (non-blocking)'
-
-            // ✅ JUnit reports
-            junit testResults: '**/target/surefire-reports/*.xml',
-                  allowEmptyResults: true
-
-            // ✅ Archive PMD XML (for Jenkins UI)
-            archiveArtifacts artifacts: '**/target/pmd.xml',
-                             allowEmptyArchive: true
-
-            // ✅ Archive PMD HTML (clickable in Jenkins UI)
-            archiveArtifacts artifacts: '**/target/site/pmd.html',
-                             allowEmptyArchive: true
-
-            // ✅ Show PMD issues in Jenkins UI
-            recordIssues(
-                tools: [pmdParser(pattern: '**/target/pmd.xml')],
-                enabledForFailure: true
-            )
+        stage('Deploy to DEV') {
+            when { branch 'dev' }
+            steps {
+                sh '''
+                mkdir -p ${BASE_DIR}/dev
+                pkill -f ${DEV_PORT} || true
+                cp target/*.jar ${BASE_DIR}/dev/${APP_NAME}
+                nohup java -jar ${BASE_DIR}/dev/${APP_NAME} \
+                --server.port=${DEV_PORT} \
+                > ${DEV_LOG} 2>&1 &
+                '''
+            }
         }
 
-        success {
-            echo '✅ Pipeline SUCCESS'
-        }
-
-        failure {
-            echo '❌ Pipeline FAILED'
+        stage('Deploy to QA') {
+            when { branch 'qa' }
+            steps {
+                sh '''
+                mkdir -p ${BASE_DIR}/qa
+                pkill -f ${QA_PORT} || true
+                cp target/*.jar ${BASE_DIR}/qa/${APP_NAME}
+                nohup java -jar ${BASE_DIR}/qa/${APP_NAME} \
+                --server.port=${QA_PORT} \
+                > ${QA_LOG} 2>&1 &
+                '''
+            }
         }
     }
 }
+
