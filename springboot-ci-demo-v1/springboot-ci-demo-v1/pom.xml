@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< HEAD
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.9</version>
+		<version>3.4.12</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.autominsi</groupId>
-	<artifactId>springboot-ci-demo-with-aws</artifactId>
+	<groupId>com.example</groupId>
+	<artifactId>springboot-ci-demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>springboot-ci-demo-with-aws</name>
+	<name>springboot-ci-demo</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -27,7 +28,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -35,12 +36,6 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -56,6 +51,7 @@
 			</plugin>
 		</plugins>
 	</build>
+=======
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -67,27 +63,52 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.12</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>springboot-ci-demo</artifactId>
+    <artifactId>springboot-ci-demo-v1</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-ci-demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>springboot-ci-demo-v1</name>
+    <description>Spring Boot + Apache Camel CI/CD Demo</description>
 
     <properties>
         <java.version>17</java.version>
+        <camel.version>4.15.0</camel.version>
     </properties>
 
-    <!-- Dependencies -->
+    <!-- 🔑 Apache Camel BOM (THIS WAS MISSING) -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
+                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Apache Camel Spring Boot -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Direct Component -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-direct-starter</artifactId>
         </dependency>
 
         <!-- Spring Boot Test -->
@@ -99,33 +120,14 @@
 
     </dependencies>
 
-    <!-- Build Plugins -->
     <build>
         <plugins>
-
-            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-
-            <!-- ✅ PMD Plugin (XML + HTML report) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.22.0</version>
-                <configuration>
-                    <linkXRef>false</linkXRef>
-
-                    <!-- Generate BOTH reports -->
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
+>>>>>>> 150415e (Initial Spring Boot CI/CD POC application)
 
 </project>
