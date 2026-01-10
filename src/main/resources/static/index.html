@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Word Generator</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<h2>Random Word Generator</h2>
+
+<input type="number" id="num" placeholder="Enter number" />
+<button onclick="getWords()">Submit</button>
+
+<ul id="result"></ul>
+
+<script>
+function getWords() {
+    const n = document.getElementById("num").value;
+
+    fetch("/api/words/" + n)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("HTTP status " + res.status);
+            }
+            return res.json();
+        })
+        .then(data => {
+            let html = "";
+            data.forEach(w => html += `<li>${w}</li>`);
+            document.getElementById("result").innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error calling backend");
+        });
+}
+</script>
+
+</body>
+</html>
