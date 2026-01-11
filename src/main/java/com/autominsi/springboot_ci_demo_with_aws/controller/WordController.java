@@ -14,6 +14,7 @@ public class WordController {
     public WordController(WordService wordService) {
         this.wordService = wordService;
     }
+    // Auto-trigger test change for Jenkins CI
 
     @GetMapping("/words/{number}")
 public List<String> getWords(@PathVariable int number) {
