@@ -39,23 +39,14 @@ pipeline {
                 always {
                     publishHTML([
                         allowMissing: true,
-                        alwaysLinkToLastBuild: true,
                         keepAll: true,
+                        alwaysLinkToLastBuild: true,
                         reportDir: 'target/site',
                         reportFiles: 'pmd.html',
                         reportName: 'PMD Report'
                     ])
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'CI pipeline completed successfully'
-        }
-        failure {
-            echo 'CI pipeline failed'
         }
     }
 }
