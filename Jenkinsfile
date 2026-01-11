@@ -1,83 +1,61 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JDK21'
-        maven 'Maven-3.9'
+    options {
+        durabilityHint('MAX_SURVIVABILITY')
+        disableConcurrentBuilds()
     }
 
     environment {
-        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+        APP_NAME = "springboot-ci-demo"
+        BASE_DIR = "/opt/springboot"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out source code'
                 checkout scm
             }
         }
 
-        stage('Build & Test - Spring Boot CI Demo V1') {
+        stage('Build & Unit Tests') {
             steps {
-                echo 'Running build for Spring Boot CI Demo V1'
-                dir('springboot-ci-demo-v1') {
-                    bat 'mvn clean test'
+                sh './mvnw clean test'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: '**/target/surefire-reports/*.xml'
                 }
             }
         }
 
-        stage('Static Analysis - PMD (Non-Blocking)') {
+        stage('PMD Analysis') {
             steps {
-                echo 'Running PMD (non-blocking)'
-                dir('springboot-ci-demo-v1') {
-                    bat '''
-                        mvn clean test pmd:pmd site || echo "PMD failed – continuing pipeline"
-                    '''
+                sh './mvnw pmd:pmd'
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site',
+                        reportFiles: 'pmd.html',
+                        reportName: 'PMD Report'
+                    ])
                 }
-            }
-        }
-
-        stage('Deploy DEV') {
-            when {
-                branch 'dev'
-            }
-            steps {
-                echo 'Deploying DEV (POC placeholder)'
             }
         }
     }
 
     post {
-        always {
-            echo 'Publishing reports (non-blocking)'
-
-            // ✅ JUnit reports
-            junit testResults: '**/target/surefire-reports/*.xml',
-                  allowEmptyResults: true
-
-            // ✅ Archive PMD XML (for Jenkins UI)
-            archiveArtifacts artifacts: '**/target/pmd.xml',
-                             allowEmptyArchive: true
-
-            // ✅ Archive PMD HTML (clickable in Jenkins UI)
-            archiveArtifacts artifacts: '**/target/site/pmd.html',
-                             allowEmptyArchive: true
-
-            // ✅ Show PMD issues in Jenkins UI
-            recordIssues(
-                tools: [pmdParser(pattern: '**/target/pmd.xml')],
-                enabledForFailure: true
-            )
-        }
-
         success {
-            echo '✅ Pipeline SUCCESS'
+            echo 'CI pipeline completed successfully'
         }
-
         failure {
-            echo '❌ Pipeline FAILED'
+            echo 'CI pipeline failed'
         }
     }
 }
