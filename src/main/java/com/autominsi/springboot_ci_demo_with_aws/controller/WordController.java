@@ -16,7 +16,10 @@ public class WordController {
     }
 
     @GetMapping("/words/{number}")
-    public List<String> getWords(@PathVariable int number) {
-        return wordService.getWords(number);
+public List<String> getWords(@PathVariable int number) {
+    if (number <= 0) {
+        throw new IllegalArgumentException("Number must be greater than zero");
     }
+    return wordService.getWords(number);
+}
 }
