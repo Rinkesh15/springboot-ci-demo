@@ -1,9 +1,14 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JDK17'
-        maven 'Maven-3.9'
+    options {
+        durabilityHint('MAX_SURVIVABILITY')
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        APP_NAME = "springboot-ci-demo"
+        BASE_DIR = "/opt/springboot"
     }
 
     stages {
@@ -14,55 +19,31 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        stage('Build & Unit Test') {
             steps {
-                bat 'mvn clean test'
+                sh './mvnw clean test'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: '**/target/surefire-reports/*.xml'
+                }
             }
         }
 
-        stage('Static Analysis - PMD') {
+        stage('PMD Analysis') {
             steps {
-                bat 'mvn pmd:pmd'
+                sh './mvnw pmd:pmd'
             }
-        }
-
-        stage('Deploy DEV') {
-            when {
-                branch 'feature/*'
+            post {
+                always {
+                    publishHTML([
+                        reportDir: 'target/site',
+                        reportFiles: 'pmd.html',
+                        reportName: 'PMD Report'
+                    ])
+                }
             }
-            steps {
-                echo 'Deploying application to DEV App'
-                bat 'echo DEV deployment successful'
-            }
-        }
-
-        stage('Deploy QA') {
-            when {
-                branch 'dev'
-            }
-            steps {
-                echo 'Deploying application to QA App'
-                bat 'echo QA deployment successful'
-            }
-        }
-
-        stage('Deploy PROD') {
-            when {
-                branch 'master'
-            }
-            steps {
-                echo 'Deploying application to PROD App'
-                bat 'echo PROD deployment successful'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline SUCCESS'
-        }
-        failure {
-            echo 'Pipeline FAILED'
         }
     }
 }
