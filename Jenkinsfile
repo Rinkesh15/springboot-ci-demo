@@ -38,6 +38,9 @@ pipeline {
             post {
                 always {
                     publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
                         reportDir: 'target/site',
                         reportFiles: 'pmd.html',
                         reportName: 'PMD Report'
