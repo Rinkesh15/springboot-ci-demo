@@ -1,0 +1,4 @@
+target/
+springboot-ci-demo-v1/
+springboot-ci-demo-with-AWS/
+*.log
