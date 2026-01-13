@@ -10,21 +10,35 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.12</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>springboot-ci-demo</artifactId>
+    <artifactId>springboot-ci-demo-v1</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-ci-demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>springboot-ci-demo-v1</name>
+    <description>Spring Boot + Apache Camel CI/CD Demo</description>
 
     <properties>
+        <!-- You can change this to 21 later if needed -->
         <java.version>17</java.version>
+        <camel.version>4.15.0</camel.version>
     </properties>
 
-    <!-- Dependencies -->
+    <!-- Apache Camel BOM -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
+                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <!-- Spring Web -->
@@ -33,7 +47,19 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Boot Test -->
+        <!-- Apache Camel Spring Boot -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Direct -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-direct-starter</artifactId>
+        </dependency>
+
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -42,32 +68,12 @@
 
     </dependencies>
 
-    <!-- Build Plugins -->
     <build>
         <plugins>
-
-            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-
-            <!-- ✅ PMD Plugin (XML + HTML report) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.22.0</version>
-                <configuration>
-                    <linkXRef>false</linkXRef>
-
-                    <!-- Generate BOTH reports -->
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 
