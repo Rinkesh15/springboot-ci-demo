@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Build & Unit Test') {
+        stage('Build & Unit Tests') {
             steps {
                 sh './mvnw clean test'
             }
@@ -39,8 +39,8 @@ pipeline {
                 always {
                     publishHTML([
                         allowMissing: true,
-                        alwaysLinkToLastBuild: true,
                         keepAll: true,
+                        alwaysLinkToLastBuild: true,
                         reportDir: 'target/site',
                         reportFiles: 'pmd.html',
                         reportName: 'PMD Report'
