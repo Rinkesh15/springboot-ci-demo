@@ -1,0 +1,30 @@
+name: Auto Create PR to Dev
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: dev
+          title: 'Auto PR: ${{ github.ref_name }} → dev'
+          body: |
+            🔁 This PR was automatically created.
+
+            - Source branch: `${{ github.ref_name }}`
+            - Target branch: `dev`
+            - Dev branch is protected
+            - Approval is mandatory
+          labels: auto-pr
