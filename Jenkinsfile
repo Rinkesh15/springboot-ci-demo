@@ -78,6 +78,7 @@ pipeline {
 
         failure {
             echo '❌ Pipeline FAILED'
+	// Updated Jenkinsfile for AWS CI demo
         }
     }
 }
