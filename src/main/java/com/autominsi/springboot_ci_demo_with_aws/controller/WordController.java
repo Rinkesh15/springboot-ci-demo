@@ -15,7 +15,7 @@ public class WordController {
         this.wordService = wordService;
     }
 
-    // Jenkins auto-trigger verification
+    // Jenkins auto-trigger verification v2
 
     @GetMapping("/words/{number}")
     public List<String> getWords(@PathVariable int number) {
