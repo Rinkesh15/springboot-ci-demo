@@ -4,7 +4,6 @@ pipeline {
     options {
         durabilityHint('MAX_SURVIVABILITY')
         disableConcurrentBuilds()
-        timeout(time: 30, unit: 'MINUTES')
     }
 
     environment {
@@ -25,9 +24,9 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "Using Java:"
+                    echo "Java Version Used:"
                     java -version
-                    echo "Using Maven:"
+                    echo "Maven Version Used:"
                     mvn -version
 
                     mvn clean test
