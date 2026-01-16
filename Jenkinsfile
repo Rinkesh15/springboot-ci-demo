@@ -9,7 +9,6 @@ pipeline {
     environment {
         BASE_DIR = "/opt/springboot"
         APP_NAME = "springboot-camel.jar"
-        MAVEN_CMD = "./mvnw"
     }
 
     stages {
@@ -23,8 +22,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    chmod +x mvnw
-                    ${MAVEN_CMD} clean test
+                    mvn clean test
                 '''
             }
             post {
@@ -38,7 +36,7 @@ pipeline {
         stage('Code Quality Reports') {
             steps {
                 sh '''
-                    ${MAVEN_CMD} pmd:pmd site
+                    mvn pmd:pmd site
                 '''
             }
             post {
@@ -72,7 +70,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    ${MAVEN_CMD} package -DskipTests
+                    mvn package -DskipTests
                 '''
             }
         }
