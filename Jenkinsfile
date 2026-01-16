@@ -4,14 +4,11 @@ pipeline {
     options {
         durabilityHint('MAX_SURVIVABILITY')
         disableConcurrentBuilds()
-        timeout(time: 30, unit: 'MINUTES')
     }
 
     environment {
         BASE_DIR = "/opt/springboot"
         APP_NAME = "springboot-camel.jar"
-        JAVA_HOME = "/usr/lib/jvm/java-21-amazon-corretto"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -25,11 +22,6 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "Using Java:"
-                    java -version
-                    echo "Using Maven:"
-                    mvn -version
-
                     mvn clean test
                 '''
             }
