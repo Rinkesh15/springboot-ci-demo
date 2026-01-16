@@ -1,84 +1,107 @@
 pipeline {
     agent any
-
-    tools {
-        jdk 'JDK21'
-        maven 'Maven-3.9'
+    options {
+        durabilityHint('MAX_SURVIVABILITY')
+        disableConcurrentBuilds()
     }
-
     environment {
-        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+        BASE_DIR = "/opt/springboot"
+        APP_NAME = "springboot-camel.jar"
     }
-
     stages {
-
         stage('Checkout') {
             steps {
-                echo 'Checking out source code'
                 checkout scm
             }
         }
-
-        stage('Build & Test - Spring Boot CI Demo V1') {
+        stage('Build & Test') {
             steps {
-                echo 'Running build for Spring Boot CI Demo V1'
-                dir('springboot-ci-demo-v1') {
-                    bat 'mvn clean test'
+                sh '''
+                    chmod +x mvnw
+                    ./mvnw clean test
+                '''
+            }
+            post {
+                always {
+                    junit testResults: '**/target/surefire-reports/*.xml',
+                    allowEmptyResults: true
                 }
             }
         }
-
-        stage('Static Analysis - PMD (Non-Blocking)') {
+        stage('Code Quality Reports') {
             steps {
-                echo 'Running PMD (non-blocking)'
-                dir('springboot-ci-demo-v1') {
-                    bat '''
-                        mvn clean test pmd:pmd site || echo "PMD failed – continuing pipeline"
-                    '''
+                sh '''
+                    ./mvnw pmd:pmd site
+                '''
+            }
+            post {
+                always {
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site',
+                        reportFiles: 'surefire-report.html',
+                        reportName: 'JUnit Test Report'
+                    ])
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site',
+                        reportFiles: 'pmd.html',
+                        reportName: 'PMD Report'
+                    ])
                 }
             }
         }
-
-        stage('Deploy DEV') {
+        stage('Package') {
             when {
-                branch 'dev'
+                anyOf {
+                    branch 'dev'
+                    branch 'qa'
+                }
             }
             steps {
-                echo 'Deploying DEV (POC placeholder)'
+                sh '''
+                    ./mvnw package -DskipTests
+                '''
             }
         }
+        stage('Deploy DEV') {
+    when {
+        branch 'dev'
     }
-
-    post {
-        always {
-            echo 'Publishing reports (non-blocking)'
-
-            // ✅ JUnit reports
-            junit testResults: '**/target/surefire-reports/*.xml',
-                  allowEmptyResults: true
-
-            // ✅ Archive PMD XML (for Jenkins UI)
-            archiveArtifacts artifacts: '**/target/pmd.xml',
-                             allowEmptyArchive: true
-
-            // ✅ Archive PMD HTML (clickable in Jenkins UI)
-            archiveArtifacts artifacts: '**/target/site/pmd.html',
-                             allowEmptyArchive: true
-
-            // ✅ Show PMD issues in Jenkins UI
-            recordIssues(
-                tools: [pmdParser(pattern: '**/target/pmd.xml')],
-                enabledForFailure: true
-            )
-        }
-
-        success {
-            echo '✅ Pipeline SUCCESS'
-        }
-
-        failure {
-            echo '❌ Pipeline FAILED'
-	// Updated Jenkinsfile for AWS CI demo
+    steps {
+        sh '''
+            echo "Deploying DEV on same EC2"
+            pkill -f "spring.profiles.active=dev" || true
+            mkdir -p /opt/springboot/logs
+            cp target/camel-demo-1.0.0.jar /opt/springboot/dev/springboot-camel.jar
+            nohup sh -c '
+              java -jar /opt/springboot/dev/springboot-camel.jar \
+                --spring.profiles.active=dev \
+                --server.port=8081 \
+                > /opt/springboot/logs/dev.log 2>&1
+            ' &
+        '''
+    }
+}
+        stage('Deploy QA') {
+            when {
+                branch 'qa'
+            }
+            steps {
+                sh '''
+                    echo "Deploying QA on same EC2"
+                    pkill -f "spring.profiles.active=qa" || true
+                    cp target/*.jar ${BASE_DIR}/qa/${APP_NAME}
+                    nohup java -jar ${BASE_DIR}/qa/${APP_NAME} \
+                        --spring.profiles.active=qa \
+                        --server.port=8082 \
+                        > ${BASE_DIR}/logs/qa.log 2>&1 &
+                '''
+            }
         }
     }
 }
