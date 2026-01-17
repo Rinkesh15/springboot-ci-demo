@@ -1,49 +1,37 @@
 pipeline {
     agent any
-
     options {
         durabilityHint('MAX_SURVIVABILITY')
         disableConcurrentBuilds()
     }
-
     environment {
         BASE_DIR = "/opt/springboot"
         APP_NAME = "springboot-camel.jar"
-        JAVA_HOME = "/usr/lib/jvm/java-21-amazon-corretto"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
-
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "Java Version Used:"
-                    java -version
-                    echo "Maven Version Used:"
-                    mvn -version
-
-                    mvn clean test
+                    chmod +x mvnw
+                    ./mvnw clean test
                 '''
             }
             post {
                 always {
                     junit testResults: '**/target/surefire-reports/*.xml',
-                          allowEmptyResults: true
+                    allowEmptyResults: true
                 }
             }
         }
-
         stage('Code Quality Reports') {
             steps {
                 sh '''
-                    mvn pmd:pmd site
+                    ./mvnw pmd:pmd site
                 '''
             }
             post {
@@ -67,7 +55,6 @@ pipeline {
                 }
             }
         }
-
         stage('Package') {
             when {
                 anyOf {
@@ -77,33 +64,29 @@ pipeline {
             }
             steps {
                 sh '''
-                    mvn package -DskipTests
+                    ./mvnw package -DskipTests
                 '''
             }
         }
-
         stage('Deploy DEV') {
-            when {
-                branch 'dev'
-            }
-            steps {
-                sh '''
-                    echo "Deploying DEV on same EC2"
-
-                    pkill -f "spring.profiles.active=dev" || true
-
-                    mkdir -p ${BASE_DIR}/dev ${BASE_DIR}/logs
-
-                    cp target/*.jar ${BASE_DIR}/dev/${APP_NAME}
-
-                    nohup java -jar ${BASE_DIR}/dev/${APP_NAME} \
-                        --spring.profiles.active=dev \
-                        --server.port=8081 \
-                        > ${BASE_DIR}/logs/dev.log 2>&1 &
-                '''
-            }
-        }
-
+    when {
+        branch 'dev'
+    }
+    steps {
+        sh '''
+            echo "Deploying DEV on same EC2"
+            pkill -f "spring.profiles.active=dev" || true
+            mkdir -p /opt/springboot/logs
+            cp target/camel-demo-1.0.0.jar /opt/springboot/dev/springboot-camel.jar
+            nohup sh -c '
+              java -jar /opt/springboot/dev/springboot-camel.jar \
+                --spring.profiles.active=dev \
+                --server.port=8081 \
+                > /opt/springboot/logs/dev.log 2>&1
+            ' &
+        '''
+    }
+}
         stage('Deploy QA') {
             when {
                 branch 'qa'
@@ -111,13 +94,8 @@ pipeline {
             steps {
                 sh '''
                     echo "Deploying QA on same EC2"
-
                     pkill -f "spring.profiles.active=qa" || true
-
-                    mkdir -p ${BASE_DIR}/qa ${BASE_DIR}/logs
-
                     cp target/*.jar ${BASE_DIR}/qa/${APP_NAME}
-
                     nohup java -jar ${BASE_DIR}/qa/${APP_NAME} \
                         --spring.profiles.active=qa \
                         --server.port=8082 \
