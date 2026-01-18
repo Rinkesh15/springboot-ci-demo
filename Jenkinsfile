@@ -9,8 +9,10 @@ pipeline {
 
     environment {
         BASE_DIR = "/opt/springboot"
-        APP_NAME = "springboot-camel.jar"
-        JAVA_HOME = "/usr/lib/jvm/java-21-amazon-corretto"
+        APP_NAME = "springboot-ci-demo.jar"
+
+        // Force Java 17 (stable for Jenkins + Maven)
+        JAVA_HOME = "/usr/lib/jvm/java-17-amazon-corretto"
         PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
@@ -25,9 +27,10 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "Using Java:"
+                    echo "Java Version:"
                     java -version
-                    echo "Using Maven:"
+
+                    echo "Maven Version:"
                     mvn -version
 
                     mvn clean test
@@ -49,14 +52,6 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML(target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'target/site',
-                        reportFiles: 'surefire-report.html',
-                        reportName: 'JUnit Test Report'
-                    ])
                     publishHTML(target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
@@ -89,7 +84,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Deploying DEV on same EC2"
+                    echo "Deploying DEV"
 
                     pkill -f "spring.profiles.active=dev" || true
 
@@ -98,9 +93,9 @@ pipeline {
                     cp target/*.jar ${BASE_DIR}/dev/${APP_NAME}
 
                     nohup java -jar ${BASE_DIR}/dev/${APP_NAME} \
-                        --spring.profiles.active=dev \
-                        --server.port=8081 \
-                        > ${BASE_DIR}/logs/dev.log 2>&1 &
+                      --spring.profiles.active=dev \
+                      --server.port=8081 \
+                      > ${BASE_DIR}/logs/dev.log 2>&1 &
                 '''
             }
         }
@@ -111,7 +106,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Deploying QA on same EC2"
+                    echo "Deploying QA"
 
                     pkill -f "spring.profiles.active=qa" || true
 
@@ -120,9 +115,9 @@ pipeline {
                     cp target/*.jar ${BASE_DIR}/qa/${APP_NAME}
 
                     nohup java -jar ${BASE_DIR}/qa/${APP_NAME} \
-                        --spring.profiles.active=qa \
-                        --server.port=8082 \
-                        > ${BASE_DIR}/logs/qa.log 2>&1 &
+                      --spring.profiles.active=qa \
+                      --server.port=8082 \
+                      > ${BASE_DIR}/logs/qa.log 2>&1 &
                 '''
             }
         }
