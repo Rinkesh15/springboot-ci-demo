@@ -7,11 +7,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Spring Boot Parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.9</version>
+        <version>3.2.5</version>
         <relativePath/>
     </parent>
 
@@ -19,29 +18,19 @@
     <artifactId>springboot-ci-demo-with-aws</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>springboot-ci-demo-with-aws</name>
-    <description>Spring Boot CI/CD Demo</description>
 
     <properties>
-        <java.version>21</java.version>
+        <!-- Stable Java for Jenkins -->
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
 
-        <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- DevTools -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -52,6 +41,16 @@
 
     <build>
         <plugins>
+
+            <!-- Compiler plugin pinned to Java 17 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
 
             <!-- Spring Boot -->
             <plugin>
@@ -64,13 +63,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>3.22.0</version>
-                <configuration>
-                    <linkXRef>false</linkXRef>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                </configuration>
             </plugin>
 
         </plugins>
