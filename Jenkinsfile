@@ -10,10 +10,7 @@ pipeline {
     environment {
         BASE_DIR = "/opt/springboot"
         APP_NAME = "springboot-ci-demo.jar"
-
-        // Force Java 17 (stable for Jenkins + Maven)
-        JAVA_HOME = "/usr/lib/jvm/java-17-amazon-corretto"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+        // ❌ DO NOT set JAVA_HOME here
     }
 
     stages {
@@ -27,12 +24,19 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "Java Version:"
+                    echo "======================"
+                    echo "Java Version"
+                    echo "======================"
                     java -version
 
-                    echo "Maven Version:"
+                    echo "======================"
+                    echo "Maven Version"
+                    echo "======================"
                     mvn -version
 
+                    echo "======================"
+                    echo "Running Tests"
+                    echo "======================"
                     mvn clean test
                 '''
             }
