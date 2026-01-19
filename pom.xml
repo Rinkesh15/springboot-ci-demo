@@ -19,18 +19,22 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>springboot-ci-demo-with-aws</name>
 
+    <!-- ✅ Java alignment -->
     <properties>
-        <!-- Stable Java for Jenkins -->
-        <java.version>17</java.version>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencies>
 
+        <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Spring Boot Test (JUnit 5) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -42,13 +46,23 @@
     <build>
         <plugins>
 
-            <!-- Compiler plugin pinned to Java 17 -->
+            <!-- ✅ Compiler plugin aligned to Java 21 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>17</release>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+
+            <!-- ✅ Surefire plugin (prevents Jenkins test hang) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <forkCount>0</forkCount>
                 </configuration>
             </plugin>
 
