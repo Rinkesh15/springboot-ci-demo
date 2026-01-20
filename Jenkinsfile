@@ -51,7 +51,7 @@ pipeline {
             }
             steps {
                 sh '''
-                      mvn -B pmd:pmd site
+                      mvn -B pmd:pmd
                    '''
             }
             post {
