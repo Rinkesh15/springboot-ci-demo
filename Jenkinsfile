@@ -29,6 +29,7 @@ pipeline {
                     set -e
                     java -version
                     mvn -version
+                    set -x
                     mvn clean test
                 '''
             }
