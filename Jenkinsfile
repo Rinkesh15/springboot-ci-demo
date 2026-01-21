@@ -8,8 +8,8 @@ pipeline {
     }
 
     environment {
-        BASE_DIR = "/opt/springboot"
-        APP_NAME = "springboot-ci-demo.jar"
+        APP_NAME = "springboot-ci-demo"
+        JAR_NAME = "springboot-ci-demo.jar"
 
         JAVA_HOME = "/usr/lib/jvm/java-21-amazon-corretto.x86_64"
         PATH = "${JAVA_HOME}/bin:/usr/bin:/bin"
@@ -51,8 +51,8 @@ pipeline {
             }
             steps {
                 sh '''
-                      mvn -B pmd:pmd
-                   '''
+                    mvn -B pmd:pmd site
+                '''
             }
             post {
                 always {
@@ -68,7 +68,7 @@ pipeline {
             }
         }
 
-        stage('Package') {
+        stage('Package JAR') {
             when {
                 anyOf {
                     branch 'dev'
@@ -76,38 +76,56 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn package -DskipTests'
-            }
-        }
-
-        stage('Deploy DEV') {
-            when { branch 'dev' }
-            steps {
                 sh '''
-                    pkill -f "spring.profiles.active=dev" || true
-                    mkdir -p ${BASE_DIR}/dev ${BASE_DIR}/logs
-                    cp target/*.jar ${BASE_DIR}/dev/${APP_NAME}
-
-                    nohup java -jar ${BASE_DIR}/dev/${APP_NAME} \
-                      --spring.profiles.active=dev \
-                      --server.port=8081 \
-                      > ${BASE_DIR}/logs/dev.log 2>&1 &
+                    mvn package -DskipTests
                 '''
             }
         }
 
-        stage('Deploy QA') {
+        stage('Build RPM (DEV)') {
+            when { branch 'dev' }
+            steps {
+                sh '''
+                    set -e
+                    mkdir -p ~/rpmbuild/SOURCES
+                    cp target/*.jar ~/rpmbuild/SOURCES/${JAR_NAME}
+
+                    rpmbuild -ba ~/rpmbuild/SPECS/springboot-ci-demo.spec
+                '''
+            }
+        }
+
+        stage('Install RPM (DEV)') {
+            when { branch 'dev' }
+            steps {
+                sh '''
+                    set -e
+                    sudo dnf remove -y springboot-ci-demo || true
+                    sudo dnf install -y ~/rpmbuild/RPMS/noarch/springboot-ci-demo-*.rpm
+                '''
+            }
+        }
+
+        stage('Build RPM (QA)') {
             when { branch 'qa' }
             steps {
                 sh '''
-                    pkill -f "spring.profiles.active=qa" || true
-                    mkdir -p ${BASE_DIR}/qa ${BASE_DIR}/logs
-                    cp target/*.jar ${BASE_DIR}/qa/${APP_NAME}
+                    set -e
+                    mkdir -p ~/rpmbuild/SOURCES
+                    cp target/*.jar ~/rpmbuild/SOURCES/${JAR_NAME}
 
-                    nohup java -jar ${BASE_DIR}/qa/${APP_NAME} \
-                      --spring.profiles.active=qa \
-                      --server.port=8082 \
-                      > ${BASE_DIR}/logs/qa.log 2>&1 &
+                    rpmbuild -ba ~/rpmbuild/SPECS/springboot-ci-demo.spec
+                '''
+            }
+        }
+
+        stage('Install RPM (QA)') {
+            when { branch 'qa' }
+            steps {
+                sh '''
+                    set -e
+                    sudo dnf remove -y springboot-ci-demo || true
+                    sudo dnf install -y ~/rpmbuild/RPMS/noarch/springboot-ci-demo-*.rpm
                 '''
             }
         }
