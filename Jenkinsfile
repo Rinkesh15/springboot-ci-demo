@@ -17,20 +17,28 @@ pipeline {
 
     stages {
 
+        /* =========================
+           1. CHECKOUT CODE
+        ========================= */
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
+        /* =========================
+           2. BUILD & UNIT TESTS (SYNC WITH MANAGER)
+        ========================= */
         stage('Build & Unit Tests') {
             steps {
                 sh '''
                     set -e
                     java -version
-                    mvn -version
-                    set -x
-                    mvn clean test
+                    mvn -version || true
+
+                    echo "Using Maven Wrapper..."
+                    chmod +x mvnw
+                    ./mvnw clean test
                 '''
             }
             post {
@@ -41,6 +49,9 @@ pipeline {
             }
         }
 
+        /* =========================
+           3. PMD CODE QUALITY
+        ========================= */
         stage('PMD Code Quality (Report Only)') {
             when {
                 anyOf {
@@ -51,7 +62,8 @@ pipeline {
             }
             steps {
                 sh '''
-                    mvn -B pmd:pmd site
+                    chmod +x mvnw
+                    ./mvnw -B pmd:pmd site
                 '''
             }
             post {
@@ -68,6 +80,9 @@ pipeline {
             }
         }
 
+        /* =========================
+           4. PACKAGE JAR (SYNC WITH MANAGER)
+        ========================= */
         stage('Package JAR') {
             when {
                 anyOf {
@@ -77,11 +92,16 @@ pipeline {
             }
             steps {
                 sh '''
-                    mvn package -DskipTests
+                    echo "Packaging using Maven Wrapper..."
+                    chmod +x mvnw
+                    ./mvnw clean package -DskipTests
                 '''
             }
         }
 
+        /* =========================
+           5. BUILD RPM (DEV)
+        ========================= */
         stage('Build RPM (DEV)') {
             when { branch 'dev' }
             steps {
@@ -95,6 +115,9 @@ pipeline {
             }
         }
 
+        /* =========================
+           6. INSTALL RPM (DEV)
+        ========================= */
         stage('Install RPM (DEV)') {
             when { branch 'dev' }
             steps {
@@ -106,6 +129,9 @@ pipeline {
             }
         }
 
+        /* =========================
+           7. BUILD RPM (QA)
+        ========================= */
         stage('Build RPM (QA)') {
             when { branch 'qa' }
             steps {
@@ -119,6 +145,9 @@ pipeline {
             }
         }
 
+        /* =========================
+           8. INSTALL RPM (QA)
+        ========================= */
         stage('Install RPM (QA)') {
             when { branch 'qa' }
             steps {
