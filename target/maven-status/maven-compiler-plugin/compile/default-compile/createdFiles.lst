@@ -1,2 +1,3 @@
-com\example\springboot_ci_demo\HelloController.class
-com\example\springboot_ci_demo\SpringbootCiDemoApplication.class
+com\autominsi\springboot_ci_demo_with_aws\controller\WordController.class
+com\autominsi\springboot_ci_demo_with_aws\SpringbootCiDemoWithAwsApplication.class
+com\autominsi\springboot_ci_demo_with_aws\service\WordService.class

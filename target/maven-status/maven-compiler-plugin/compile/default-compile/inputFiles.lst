@@ -1,2 +1,3 @@
-D:\Autominsi Work\Springboot-CI-Demo\springboot-ci-demo\src\main\java\com\example\springboot_ci_demo\HelloController.java
-D:\Autominsi Work\Springboot-CI-Demo\springboot-ci-demo\src\main\java\com\example\springboot_ci_demo\SpringbootCiDemoApplication.java
+D:\Autominsi Work\Springboot-CI-Demo\springboot-ci-demo-with-AWS\src\main\java\com\autominsi\springboot_ci_demo_with_aws\service\WordService.java
+D:\Autominsi Work\Springboot-CI-Demo\springboot-ci-demo-with-AWS\src\main\java\com\autominsi\springboot_ci_demo_with_aws\SpringbootCiDemoWithAwsApplication.java
+D:\Autominsi Work\Springboot-CI-Demo\springboot-ci-demo-with-AWS\src\main\java\com\autominsi\springboot_ci_demo_with_aws\controller\WordController.java
