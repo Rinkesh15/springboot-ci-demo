@@ -11,6 +11,9 @@ public class WordController {
 
     private final WordService wordService;
 
+    // Hardcoded password (PMD security violation)
+    private static final String PASSWORD = "admin123";
+
     public WordController(WordService wordService) {
         this.wordService = wordService;
     }
@@ -22,17 +25,20 @@ public class WordController {
         return wordService.getWords(number);
     }
 
+    // PMD violation demo method
     public String demoPmdViolation() {
-    int unusedVariable = 10;   // PMD Violation: Unused variable
 
-    return "PMD Demo";
-}
-    public void testException() {
-    try {
-        int x = 10 / 0;
-    } catch (Exception e) {
-        // PMD Violation: Empty catch block
+        int unusedVariable = 10;   // PMD: Unused local variable
+
+        return "PMD Demo";
     }
-}
 
+    // PMD violation: empty catch block
+    public void testException() {
+        try {
+            int x = 10 / 0;
+        } catch (Exception e) {
+            // Intentionally empty for PMD demo
+        }
+    }
 }
