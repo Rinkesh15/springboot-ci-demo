@@ -1,63 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Random Word Generator - Jenkins CI/CD Demo 🚀</title>
+    <title>Random Word Generator - Jenkins CI/CD Demo 🚀 </title>
     <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            text-align: center;
-            padding-top: 50px;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        h3 {
-            color: #16a085;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background: white;
-            margin: 5px auto;
-            padding: 8px;
-            width: 200px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px #ccc;
-        }
-        footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: gray;
-        }
-    </style>
 </head>
-
 <body>
 
-<h1>Random Word Generator</h1>
-<h3>🚀 Deployed via Jenkins CI/CD Pipeline (DEV Environment)</h3>
+<h2>Random Word Generator</h2>
 
-<p><b>Deployment Time:</b> <span id="deployTime"></span></p>
-
-<input type="number" id="num" placeholder="Enter number of words" />
-<button onclick="getWords()">Generate Words</button>
+<input type="number" id="num" placeholder="Enter number" />
+<button onclick="getWords()">Submit</button>
 
 <ul id="result"></ul>
 
 <script>
-// Show deployment timestamp
-document.getElementById("deployTime").innerHTML = new Date().toString();
-
-// Call backend API
 function getWords() {
     const n = document.getElementById("num").value;
 
@@ -70,4 +26,15 @@ function getWords() {
         })
         .then(data => {
             let html = "";
-            data.forEach(w
+            data.forEach(w => html += `<li>${w}</li>`);
+            document.getElementById("result").innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error calling backend");
+        });
+}
+</script>
+
+</body>
+</html>
