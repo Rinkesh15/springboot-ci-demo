@@ -21,4 +21,18 @@ public class WordController {
     public List<String> getWords(@PathVariable int number) {
         return wordService.getWords(number);
     }
+
+    public String demoPmdViolation() {
+    int unusedVariable = 10;   // PMD Violation: Unused variable
+
+    return "PMD Demo";
+}
+    public void testException() {
+    try {
+        int x = 10 / 0;
+    } catch (Exception e) {
+        // PMD Violation: Empty catch block
+    }
+}
+
 }
