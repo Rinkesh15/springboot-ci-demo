@@ -25,20 +25,5 @@ public class WordController {
         return wordService.getWords(number);
     }
 
-    // PMD violation demo method
-    public String demoPmdViolation() {
-
-        int unusedVariable = 10;   // PMD: Unused local variable
-
-        return "PMD Demo";
-    }
-
-    // PMD violation: empty catch block
-    public void testException() {
-        try {
-            int x = 10 / 0;
-        } catch (Exception e) {
-            // Intentionally empty for PMD demo
-        }
-    }
+    
 }
